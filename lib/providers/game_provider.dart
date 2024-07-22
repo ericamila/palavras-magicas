@@ -3,20 +3,20 @@ import '../models/word.dart';
 
 class GameProvider with ChangeNotifier {
   final List<Word> _words = [
-    Word('apple', 'frutas'),
-    Word('banana', 'frutas'),
-    Word('grape', 'frutas'),
-    Word('orange', 'frutas'),
-    Word('mango', 'frutas'),
-    Word('dog', 'animais'),
-    Word('cat', 'animais'),
-    Word('bird', 'animais'),
-    Word('car', 'transportes'),
-    Word('bike', 'transportes'),
-    Word('bus', 'transportes'),
-    Word('shirt', 'roupas'),
-    Word('pants', 'roupas'),
-    Word('jacket', 'roupas'),
+    Word('MAÇA', 'frutas'),
+    Word('BANANA', 'frutas'),
+    Word('UVA', 'frutas'),
+    Word('LARANJA', 'frutas'),
+    Word('MORANGO', 'frutas'),
+    Word('CACHORRO', 'animais'),
+    Word('GATO', 'animais'),
+    Word('PÁSSARO', 'animais'),
+    Word('CARRO', 'transportes'),
+    Word('BICICLETA', 'transportes'),
+    Word('ÔNIBUS', 'transportes'),
+    Word('CALÇA', 'roupas'),
+    Word('BLUSA', 'roupas'),
+    Word('JAQUETA', 'roupas'),
     // Adicione mais palavras aqui
   ];
 
@@ -24,6 +24,7 @@ class GameProvider with ChangeNotifier {
   late List<Word> _filteredWords;
   late Word _currentWord;
   late List<String> _currentGuess;
+  int _score = 0;
 
   GameProvider() {
     _filteredWords = _words; // Inicializar com todas as palavras
@@ -32,6 +33,7 @@ class GameProvider with ChangeNotifier {
 
   Word get currentWord => _currentWord;
   String get currentGuess => _currentGuess.join('');
+  int get score => _score;
 
   void updateCategories(List<String> categories) {
     _selectedCategories = categories;
@@ -45,9 +47,20 @@ class GameProvider with ChangeNotifier {
   void _setNewWord() {
     _currentWord = _filteredWords.isNotEmpty
         ? _filteredWords[0]
-        : Word('No words available', '');
+        : Word('Palavras não disponíveis!', '');
     _currentGuess = _currentWord.shuffled.split('');
   }
+
+/*  void _setNewWord() {
+    if (_filteredWords.isNotEmpty) {
+      _currentWord = _filteredWords[0];
+      _currentGuess = _currentWord.shuffled.split('');
+    } else {
+      _currentWord = Word('Palavras não disponíveis!', '');
+      _currentGuess = [];
+    }
+    notifyListeners();
+  }*/
 
   void shuffleWord() {
     if (_filteredWords.isEmpty) return;
@@ -65,6 +78,15 @@ class GameProvider with ChangeNotifier {
   }
 
   bool checkGuess() {
-    return currentGuess == _currentWord.original;
+    if (currentGuess == _currentWord.original) {
+      _score += 10;
+      notifyListeners();
+      return true;
+    } else {
+      _score -= 5;
+      notifyListeners();
+      return false;
+    }
   }
+
 }

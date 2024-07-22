@@ -1,84 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
-import '../widgets/letter_tile.dart';
-import '../widgets/word_display.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GameProvider(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Jogo de Formação de Palavras'),
-        ),
-        body: Consumer<GameProvider>(
-          builder: (context, gameProvider, child) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                WordDisplay(currentGuess: gameProvider.currentGuess),
-                const SizedBox(height: 20),
-                Wrap(
-                  spacing: 10,
-                  children: gameProvider.currentGuess
-                      .split('')
-                      .asMap()
-                      .entries
-                      .map((entry) => LetterTile(
-                    letter: entry.value,
-                    index: entry.key,
-                  ))
-                      .toList(),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  child: const Text('Verificar'),
-                  onPressed: () {
-                    if (gameProvider.checkGuess()) {
-                      // Mostrar mensagem de sucesso
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Parabéns!'),
-                          content: const Text('Você formou a palavra correta!'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                gameProvider.shuffleWord();
-                              },
-                            ),
-                          ],
+    final gameProvider = Provider.of<GameProvider>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Forme a Palavra'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  text: 'Pontuação\n',
+                  style: const TextStyle(color: Colors.black, fontSize: 20),
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: gameProvider.score.toString(),
+                      style: const TextStyle(
+                          color: Colors.blueAccent, fontSize: 24, height: 1.8, fontWeight: FontWeight.w600),
+                    )
+                  ]),
+            ),
+            const Text(
+              'Arraste as letras para formar a palavra correta:',
+              style: TextStyle(fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: gameProvider.currentGuess
+                  .split('')
+                  .asMap()
+                  .entries
+                  .map((entry) {
+                int index = entry.key;
+                String letter = entry.value;
+                return Draggable<int>(
+                  data: index,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      letter,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  childWhenDragging: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    child: Text(
+                      letter,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  child: DragTarget<int>(
+                    builder: (BuildContext context, List<dynamic> accepted,
+                        List<dynamic> rejected) {
+                      return Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.center,
+                        child: Text(
+                          letter,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       );
-                    } else {
-                      // Mostrar mensagem de erro
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Tente novamente'),
-                          content: const Text('A palavra está incorreta.'),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            );
-          },
+                    },
+                    onAccept: (int data) {
+                      gameProvider.swapLetters(data, index);
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+            Text(gameProvider.currentWord.category[0].toUpperCase() +
+                gameProvider.currentWord.category.substring(1)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (gameProvider.checkGuess()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Correto!')),
+                  );
+                  gameProvider.shuffleWord();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Tente novamente!')),
+                  );
+                }
+              },
+              child: const Text('Verificar'),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );

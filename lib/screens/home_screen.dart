@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'game_screen.dart';
 import 'instructions_screen.dart';
 import 'settings_screen.dart';
-import 'package:flutter/services.dart'; // Import necessário para SystemNavigator
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,7 +10,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Palavra Mágica'),
+        title: const Text('Palavras Mágicas'),
       ),
       body: Center(
         child: Column(
@@ -42,12 +41,6 @@ class HomeScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Sair'),
-              onPressed: () {
-                SystemNavigator.pop();
               },
             ),
           ],
